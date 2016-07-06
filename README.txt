@@ -9,15 +9,16 @@ functions not working yet include a automated device/network scanner and a gui n
 What you need to make this code work at this moment: 
 
 - Linuxsystem with Ping installed (tested on Debain 8.2 and Mint 17.2)
-- python 2 (python3 should be possible with some minor edits)
-- python PILL lib (need to dump this lib, is hard for windows users to install)
-- tKinter
+- python 3
+- python PIL lib (need to dump this lib, is hard for windows users to install)
+- sudo apt install python3-pil.imagetk
+- Tkinter
 - (probably forgot things here)
 
 
 How to use:
 
-run in terminal: python __init__.py
+run in terminal: python3 __init__.py
 
 
 How to config:
@@ -33,7 +34,6 @@ included are 2 config examples:
 
 TODO:
 
-- mitigate to python 3
 - make a gui for editing nodes in the network
 - make a gui for scanning a network for devices to quickly map a network and name devices
 - add MSWindows support

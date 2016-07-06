@@ -12,24 +12,24 @@ def validIp4(address):
 	chars = set("012345.")
 	parts = address.split(".")
 
-	if str(len(parts)) == "4" and parts[0] != "" and parts[1] != "" and parts[2] != "" and parts[3] != "":
-		if str(len(address)) > "6" or len(address) < "16":
-			if (str(len(parts[0])) > "0" and str(len(parts[0])) < "4") and (str(len(parts[1])) > "0" and str(len(parts[1])) < "4") and (str(len(parts[2])) > "0" and str(len(parts[2])) < "4") and (str(len(parts[3])) > "0" and str(len(parts[3])) < "4"):
+	if len(parts) == 4 and parts[0] != "" and parts[1] != "" and parts[2] != "" and parts[3] != "":
+		if len(address) > 6 or len(address) < 16:
+			if (len(parts[0]) > 0 and len(parts[0]) < 4) and (len(parts[1]) > 0 and len(parts[1]) < 4) and (len(parts[2]) > 0 and len(parts[2]) < 4) and (len(parts[3]) > 0 and len(parts[3]) < 4):
 				if any((c in chars) for c in address):
 					check = True
 	return check
-	
+
 def validIp6(address):
 	"""check if given ip address is an valid IPv6 address"""
 	#nothing here yet.
 	return True
-	
+
 def getMyIp():
 	"""get the current ip address of the computer and return a string"""
 	ip = socket.gethostbyname(socket.gethostname()) 	#windows/Linux easy way
 
 	if ip.startswith("127.") and os.name != "nt": 		#linux hard way if hostsfile ain't cooperating
-		interfaces = ["eth0","eth1","eth2","wlan0","wlan1","wifi0","ath0","ath1","ppp0"]
+		interfaces = [b"eth0",b"eth1",b"eth2",b"wlan0",b"wlan1",b"wifi0",b"ath0",b"ath1",b"ppp0"]
 		for ifname in interfaces:
 			try:
 				s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
