@@ -310,8 +310,8 @@ class mainWindow(Frame):
 			nodew = settings.mapperNodeSize
 			nodeh = settings.mapperNodeSize
 			borderw = 2
-			posX2 = int(posX) + nodew
-			posY2 = int(posY) + nodeh
+			posX2 = int(float(posX)) + nodew
+			posY2 = int(float(posY)) + nodeh
 
 			# save the nodes coordinates
 			node[12] = "" + str(posX) + "x" + str(posY) + ""
@@ -339,8 +339,8 @@ class mainWindow(Frame):
 
 			# put a namebox and text next to node
 			if settings.mapperShowLabels:
-				nameX = int(posX) + nodew + 3
-				nameY = int(posY) + 1
+				nameX = int(float(posX)) + nodew + 3
+				nameY = int(float(posY)) + 1
 				nodenametext = self.nodeMap.create_text(nameX,nameY, text=node[0],
 					anchor=NW, fill=textstatus, tags=("top", "nodetext", "node"))
 				nameLocation = self.nodeMap.bbox(nodenametext)
@@ -354,8 +354,8 @@ class mainWindow(Frame):
 					linetype = (9,7)
 				for ip in node[10]:
 					if not ip==node[6] or ip==node[7] or ip==node[8] or ip=="":
-						x1 = int(posX) + nodew/2
-						y1 = int(posY) + nodeh/2
+						x1 = int(float(posX)) + nodew/2
+						y1 = int(float(posY)) + nodeh/2
 						xy = [posX,posY]
 
 						for parents in settings.nodes:
@@ -363,8 +363,8 @@ class mainWindow(Frame):
 								if parent==ip:
 									if not parents[12]=="":
 										xy = parents[12].split("x")
-										x2 = int(xy[0])+nodew/2
-										y2 = int(xy[1])+nodeh/2
+										x2 = int(float(xy[0]))+nodew/2
+										y2 = int(float(xy[1]))+nodeh/2
 									if linetype==0:
 										#self.nodeMap.create_line(x1,y1,x2,y2, fill="white",
 											#width=6, capstyle=ROUND, smooth=True, tags=("subline"))

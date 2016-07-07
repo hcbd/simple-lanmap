@@ -38,9 +38,5 @@ ehthumbs.db
 Thumbs.db
 
 ######################
-<<<<<<< HEAD
-# ninja project file
-=======
 # No Ninja IDE project files
->>>>>>> python3
 *.nja
