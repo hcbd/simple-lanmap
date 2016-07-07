@@ -2,7 +2,7 @@
 
 import log as logger
 
-import ConfigParser
+from configparser import ConfigParser, RawConfigParser, SafeConfigParser
 from collections import OrderedDict
 
 # DEFAULT SETTINGS
@@ -15,7 +15,7 @@ networkDnsServer = "192.168.1.1"
 networkDhcpDetectRunning = False
 networkFoundDhcpServers = []
 
-# Scanner settings	
+# Scanner settings
 scanStartAddress = "192.168.1.1"
 scanStopAddress = "192.168.1.254"
 scanPingTries = 1
@@ -30,7 +30,7 @@ monitorPingInterval = 30
 monitorUpdateInterval = 15000
 monitorPingTries = 1
 monitorPingTimeout = 1000
-monitorRunning = False	
+monitorRunning = False
 
 # Example Nodes / example config loaded when no settingsfile is found
 nodesDefault = [["Wireless Router",                   #0 name
@@ -142,7 +142,7 @@ logInTerminal = False
 
 def save():
 	"""Save the current settings to settings.ini"""
-	
+
 	# lets try to write the config file
 	try:
 		f = open("settings.ini","w")
@@ -153,12 +153,12 @@ def save():
 		f.write("#     Made by hcbd      #\n")
 		f.write("#########################\n")
 		f.write("\n")
-		
+
 		#Gui settings
 		f.write("[Main Window]\n")
 		f.write("WindowSize=" + guiWindowSize + "\n")
 		f.write("\n")
-		
+
 		#Map settings
 		f.write("[Map]\n")
 		f.write("MapUpdateInterval=" + str(monitorUpdateInterval) + "\n")
@@ -171,7 +171,7 @@ def save():
 		f.write("NodeStatusColorAwaiting=" + str(mapperNodeStatusColorAwaiting) + "\n")
 		f.write("NodeStatusColorNoStatus=" + str(mapperNodeStatusColorNoStatus) + "\n")
 		f.write("\n")
-				
+
 		# save current nodes
 		f.write("# Do not edit below !\n")
 		f.write("\n")
@@ -200,13 +200,13 @@ def save():
 			#f.write("" + str(nodecount) + ".customIcon = " + str(node[15]) + "\n")
 			f.write("\n")
 			nodecount = nodecount + 1
-		
+
 		f.write("\n")
 		f.write("\n")
 		f.write("\n")
 		f.close()
 	except:
-		print "error while writing to settings.ini file"
+		print("error while writing to settings.ini file")
 
 class MultiOrderedDict(OrderedDict):
     def __setitem__(self, key, value):
@@ -220,16 +220,16 @@ def load():
 	# get nodes
 	global nodes
 	try:
-		cfg = ConfigParser.RawConfigParser(dict_type=MultiOrderedDict)
+		cfg = RawConfigParser(dict_type=MultiOrderedDict)
 		cfg.read("settings.ini")
-		
+
 		# for some reason mulitordereddict gives an empty list with .options()
-		cfgs = ConfigParser.SafeConfigParser()
+		cfgs = SafeConfigParser()
 		cfgs.read("settings.ini")
 		x = 0
-		
+
 		nodes = []
-		
+
 		for option in cfgs.options("Nodes"):
 			# check each node for number
 			parts = option.split(".")
@@ -237,76 +237,76 @@ def load():
 				partsnr = int(parts[0])
 			except:
 				partsnr = "not an integer"
-			if isinstance(partsnr, (int, long)) and partsnr >= 0:
-				
+			if isinstance(partsnr, int) and partsnr >= 0:
+
 				if partsnr == x:
 					nodes.append(["","","","",True,"",["",],["",],"",[1,],["",],0,"",False,0,""])
 					x = x + 1
-							
+
 				value = cfg.get("Nodes", option)
-				
+
 				if parts[1] == "name":
 					nodes[partsnr][0] = (str(value[0]))
-					
+
 				if parts[1] == "group":
 					nodes[partsnr][1] = str(value[0])
-					
+
 				if parts[1] == "type":
 					nodes[partsnr][2] = str(value[0])
-					
+
 				if parts[1] == "location":
 					nodes[partsnr][3] = str(value[0])
-					
+
 				if parts[1] == "pingable":
 					if str(value[0])=="True":
 						nodes[partsnr][4] = True
 					if str(value[0])=="False":
 						nodes[partsnr][4] = False
-						
+
 				if parts[1] == "status":
 					nodes[partsnr][5] = str(value[0])
-					
+
 				if parts[1] == "ipv4":
 					nodes[partsnr][6] = value
-					
+
 				if parts[1] == "ipv6global":
 					nodes[partsnr][7] = value
-					
+
 				if parts[1] == "ipv6linklocal":
 					nodes[partsnr][8] = str(value[0])
-					
+
 				if parts[1] == "vlan":
 					nodes[partsnr][9] = []
 					for var in value:
 						nodes[partsnr][9].append(int(var))
-					
+
 				if parts[1] == "parent":
 					nodes[partsnr][10] = value
-					
+
 				if parts[1] == "listposition":
 					nodes[partsnr][11] = int(str(value[0]))
-					
+
 				if parts[1] == "mapposition":
 					nodes[partsnr][12] = str(value[0])
-					
+
 				if parts[1] == "wirelesstoparent":
 					if str(value[0])=="True" or str(value[0])=="true":
 						nodes[partsnr][13] = True
 					if str(value[0])=="False" or str(value[0])=="false":
 						nodes[partsnr][13] = False
-	
+
 				#if parts[1] == "customIcon":
 					#nodes[partsnr][14] = int(str(value[0]))
-					
+
 				#if parts[1] == "customIcon":
 					#nodes[partsnr][15] = str(value[0])
-	
+
 		# get the rest of the vars
 		global mapperImage, mapperImageScaling, mapperNodeSize
 		global mapperNodeStatusColorOnline, mapperNodeStatusColorOffline
 		global mapperNodeStatusColorAwaiting, mapperNodeStatusColorNoStatus
 		global monitorUpdateInterval
-		
+
 		monitorUpdateInterval = str(cfgs.get("Map", "MapupdateInterval"))
 		mapperImage = str(cfgs.get("Map", "BgImageLocation"))
 		mapperImageScaling = str(cfgs.get("Map","BgImageScaling"))
