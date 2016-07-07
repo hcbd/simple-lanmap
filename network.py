@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os, socket
+import os, socket, sys
 from array import *
+from subprocess import Popen, STDOUT, DEVNULL
+
 if os.name != "nt":
 	import fcntl
 	import struct
@@ -38,14 +40,21 @@ def getMyIp():
 				pass
 	return ip
 
-def ping(address, timeout = "1", tries = "1"):
-	"""ping the given address, return true if address is online"""
-	#simple dirty linux ping
-	response = os.system("ping -c " + str(tries) + " -W" + str(timeout) + " " + address)
-	if response:
-		return False
-	else:
-		return True
+def ping_windows(address, timeout=1, count=1):
+	"""Ping address and return True if the host responded in time."""
+	# Windows' ping takes a timeout value in milliseconds.
+	args = ('ping', address, '-n', str(count), '-w', str(timeout*1000))
+	with Popen(args, stdout=DEVNULL, stderr=STDOUT) as proc:
+		return proc.wait() == 0
+
+def ping_linux(address, timeout=1, count=1):
+	"""Ping address and return True if the host responded in time."""
+	args = ('ping', address, '-c', str(count), '-W', str(timeout))
+	with Popen(args, stdout=DEVNULL, stderr=STDOUT) as proc:
+		return proc.wait() == 0
+
+# Choose the ping function depending on platform.
+ping = ping_windows if sys.platform == 'win32' else ping_linux
 
 def dhcpDetect():
 	"""listen for (rouge) dhcp servers
