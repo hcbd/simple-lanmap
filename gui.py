@@ -451,6 +451,8 @@ class mainWindow(Frame):
 	# Scanner Window - work in progres
 
 	def scannerWindow(self, event):
+		# TODO: needs a check if the node edit window is already opened,
+		#       if so bring it to attention/on top of the main/other windows.
 		self.scannerGui = Toplevel()
 		self.scannerGui.title("Lan Map - Scanner")
 		self.scannerGui.geometry("700x500")
@@ -473,6 +475,8 @@ class mainWindow(Frame):
 	# EditNodes Window - work in progres
 
 	def editNodesWindow(self, event, openNode=0):
+		# TODO: needs a check if the node edit window is already opened,
+		#       if so bring it to attention/on top of the main/other windows.
 		self.editNodesGui = Toplevel()
 		self.editNodesGui.title("Lan Map - Edit Nodes in Network")
 		self.editNodesGui.geometry("300x500")
@@ -492,7 +496,7 @@ class mainWindow(Frame):
 		self.editNodesOptions = tuple(self.editNodesSelection)
 		self.editNodesId = StringVar(self.editNodesGui)
 		self.editNodesId.set(self.editNodesOptions[0])
-		self.editNodesNodeSelector = apply(OptionMenu, (self.editNodesGui, self.editNodesId) + self.editNodesOptions)
+		self.editNodesNodeSelector = OptionMenu(*(self.editNodesGui, self.editNodesId) + self.editNodesOptions)
 		self.editNodesNodeSelector.pack(side=TOP, fill=X, anchor=N, padx=5, pady=5, expand=True)
 
 		# selected node
