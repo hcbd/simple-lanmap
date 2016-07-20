@@ -1,98 +1,153 @@
 # -*- coding: utf-8 -*-
 
-import settings as settings
-import network as network
-import log as log
+# scan a network for devices with this module
+
+import settings
+import log
+import network
+import ipaddress
+import _thread
+from subprocess import Popen, STDOUT, PIPE
 
 
-def start():
-	"""start a scan in a thread"""
-	settings.scanRunning = True
-	log.add("Started scanning")
-	# start a scan in a thread
-	pass
+def start_ipv4_scan(begin_address, end_address):
+    """Start a IPv4 scan in a thread"""
+    _thread.start_new_thread(scan_ipv4, ())
+
+
+def start_ipv6_scan(interface):
+    """Start a IPv6 scan in a thread"""
+    _thread.start_new_thread(scan_ipv6, ())
+
 
 def stop():
-	"""interupt the currently running scan"""
-	settings.scanRunning = False
-	pass
+    """Stop/cancel the current running scan"""
+    settings.scanner_running = False
 
-def buildScanList(startIp,endIp):
-	"""build from the input a list of hosts to scan"""
 
-	# Checking if I got valid Ip's
-	if network.validIp4(startIp) and network.validIp4(endIp):
-		startIpseg = startIp.split(".")
-		endIpseg = endIp.split(".")
-		if startIpseg[0] < endIpseg[0]:
-			#print("range to big")
-			return False
-	else:
-		#print("wrong ip")
-		return False
+def scan_ipv4(begin_address, end_address):
+    """Ping a range of IPv4 addresses return False if input is incorrect"""
+    # need 2 lists for scanning and results
+    scanlist = []
+    foundlist = []
 
-	# ip segments to integers
-	startIpseg1 = int(startIpseg[0])
-	startIpseg2 = int(startIpseg[1])
-	startIpseg3 = int(startIpseg[2])
-	startIpseg4 = int(startIpseg[3])
-	endIpseg1 = int(endIpseg[0])
-	endIpseg2 = int(endIpseg[1])
-	endIpseg3 = int(endIpseg[2])
-	endIpseg4 = int(endIpseg[3])
+    # test if ip is valid
+    start_ip = False
+    stop_ip = False
+    try:
+        start_ip = ipaddress.IPv4Address(begin_address)
+        stop_ip = ipaddress.IPv4Address(end_address)
+        if start_ip > stop_ip:
+            return False
+    except:
+        return False
 
-	# quick check if logical start/stop addresses
-	if startIpseg2 > endIpseg2 and startIpseg1 >= endIpseg1:
-		#print("startip / stopip is wrong 1")
-		return False
-	if startIpseg3 > endIpseg3 and startIpseg2 >= endIpseg2:
-		#print("startip / stopip is wrong 2 ")
-		return False
-	if startIpseg4 > endIpseg4 and startIpseg3 >= endIpseg3 and startIpseg2 == endIpseg2:
-		#print("startip / stopip is wrong 3")
-		return False
+    # build scanlist
+    if start_ip and stop_ip:
+        # convert ip's to integer for easy generating of list
+        start_int = int(ipaddress.ip_address(start_ip))
+        stop_int = int(ipaddress.ip_address(stop_ip))
+        for ip_int in range(start_int, stop_int + 1):
+            try:
+                scanlist.append(str(ipaddress.ip_address(ip_int)))
+            except:
+                return False
+    else:
+        return False
 
-	# Nodes to scan / scanlist
+    # ping each ip in the scanlist
+    settings.scanner_running = True
+    for ip in scanlist:
+        if settings.scanner_running:
+            ping = network.ping(ip)
+            if ping:
+                foundlist.append(ip)
+                settings.scanner_scan_result = foundlist
+    settings.scanner_running = False
 
-	scanNodes = []
+    if not foundlist == []:
+        settings.scanner_scan_result = foundlist
+        logmsg = "IPv4 scan completed: found "
+        logmsg += str(len(foundlist)) + " devices in scanrange "
+        logmsg += begin_address + "-" + end_address
+        log.add(logmsg)
+        return True
+    else:
+        logmsg = "IPv4 scan completed: nothing found in scanrange "
+        logmsg += begin_address + "-" + end_address
+        log.add(logmsg)
+        return False
 
-	# Build Node-Scanlist - this isn't working correctly.
-	for seg2 in range(startIpseg2, endIpseg2 +1):
-		if seg2 == startIpseg2:
-			for seg3 in range(startIpseg3, 256):
-					for seg4 in range(startIpseg4, 255):
-						print("1: ",startIpseg1, seg2, seg3, seg4)
-						scanNodes.append(str(startIpseg1) + "." + str(seg2) + "." + str(seg3) + "." + str(seg4))
-		if seg2 < endIpseg2 and seg2 > startIpseg2:
-			for seg3 in range(1, 256):
-				for seg4 in range(1, 255):
-					print("2: ",startIpseg1, seg2, seg3, seg4)
-					scanNodes.append(str(startIpseg1) + "." + str(seg2) + "." + str(seg3) + "." + str(seg4))
-		if seg2 == endIpseg2:
-			for seg3 in range(1, endIpseg3 + 1):
-				if seg3 == startIpseg3:
-					for seg4 in range(startIpseg4, 255):
-						print("3: ",startIpseg1, seg2, seg3, seg4)
-						scanNodes.append(str(startIpseg1) + "." + str(seg2) + "." + str(seg3) + "." + str(seg4))
-				if seg3 < endIpseg3 and seg3 > startIpseg3:
-					for seg4 in range(1,255):
-						print("4: ",startIpseg1, seg2, seg3, seg4)
-						scanNodes.append(str(startIpseg1) + "." + str(seg2) + "." + str(seg3) + "." + str(seg4))
-				if seg3 == endIpseg3:
-					print("5: ",startIpseg1, seg2, seg3, seg4)
-					for seg4 in range(1, endIpseg4 + 1):
-						scanNodes.append(str(startIpseg1) + "." + str(seg2) + "." + str(seg3) + "." + str(seg4))
 
-	#print("\nresulting list:")
-	#print(scanNodes)
+def scan_ipv6(interface):
+    """scan for devices in the local IPv6 range, this done by a
+       multicast ping on the local network, searching for
+       fe80 addresses"""
+    addr_int = 'ff02::1%' + interface
+    args = ['ping6', addr_int, '-c', '10', '-W', '3']
+    settings.scanner_running = True
+    with Popen(args, stdout=PIPE, stderr=STDOUT) as proc:
+        foundlist = []
+        output = proc.communicate()
+        lines = str(output[0])
+        for line in lines.split("bytes from"):
+            if line != '':
+                line = str(line)
+                start_index = line.find('fe80::')
+                stop_index = line.find(interface) - 1
+                if start_index == -1 or start_index == -2:
+                    continue
+                if stop_index == -1 or stop_index == -2:
+                    continue
+                address = line[start_index:stop_index]
+                if network.is_valid_ip6(address):
+                    if not address in foundlist:
+                        foundlist.append(address)
+            else:
+                break
+    settings.scanner_running = False
+    # put results into global scanlist
+    if not foundlist == []:
+        settings.scanner_scan_result = foundlist
+        log.add("IPv6 scan completed: found " + str(len(foundlist)) + " devices")
+        return True
+    else:
+        log.add("IPv6 scan completed: nothing found")
+        return False
 
-	if not scanNodes == []:
-		return True
-		settings.scanNodes = scanNodes
-	else:
-		return False
-		#print("no nodes")
 
-def scanInTread():
-	"""ping each address in the given range and set nodes status. Return errors"""
+class presets(object):
+    """class for handling scan presets"""
 
+    def __init__(self):
+        self.list = []
+        self.load()
+
+    def new(self):
+        """make a new preset with the following default entries"""
+        self.name = 'New Preset'
+        self.start_ip = '192.168.1.1'
+        self.end_ip = '192.168.1.254'
+        self.get_hostnames = False
+        self.slow_network = False
+
+    def add(self, name, start_ip, end_ip, get_hostnames, slow_network):
+        tup = (name, start_ip, end_ip, get_hostnames, slow_network)
+        self.list.append(tup)
+
+    def save(self):
+        """add the preset to the list and save to the preset file"""
+        try:
+            #TODO
+            return True
+        except:
+            log.add("Error saving log file")
+            return False
+
+    def load(self):
+        """load the presets from the presets file"""
+        #TODO
+        # testpreset
+        self.add("Default Preset", "192.168.1.1", "192.168.1.254", False, False)
+        # end testpreset
+        pass

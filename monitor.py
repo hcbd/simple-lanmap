@@ -1,40 +1,42 @@
 # -*- coding: utf-8 -*-
 
-import settings as settings
-import network as net
-import log as log
+# Monitor the nodes for Availability
 import time
 import _thread
 
+import settings
+import log
+import nodes
+import network
+
+
 def start():
-	"""Start monitoring of the given nodes in a thread"""
-	settings.monitorRunning = True
-	_thread.start_new_thread(monitor,())
-	#monitor()
-	log.add("Monitoring Started")
+    """Start monitoring the nodelist in a thread"""
+    settings.monitor_running = True
+    _thread.start_new_thread(monitor_nodes, ())
+    log.add('Lanmonitor started')
+
 
 def stop():
-	"""Stop or interrupt monitor"""
-	settings.monitorRunning = False
-	log.add("Monitoring Stopped")
+    """Stop monitoring of the nodelist"""
+    settings.monitor_running = False
+    log.add('Lanmonitor stopped')
 
-def monitor():
-	"""ping each node and check if online"""
 
-	status = False
-
-	while settings.monitorRunning:
-		for node in settings.nodes:
-			nodeIPs = node[6]
-			for ip in nodeIPs:
-				if node[4]:
-					status = net.ping(ip)
-					if status == True:
-						node[5] = "Online"
-					if status == False:
-						node[5] = "Offline"
-						break # if any ip of node is offline, set node status to Offline
-				else:
-					node[5] = "NoStatus"
-
-		time.sleep(settings.monitorPingInterval) # time between scans
+def monitor_nodes():
+    """Ping all nodes in the list at an given interval
+       and change the node status to the fetched one"""
+    while settings.monitor_running:
+        # load each node in list
+        for node in nodes.nodelist:
+            if node.check_status:
+                # ping every given ipv4 per node
+                for ip in node.ipv4:
+                    if network.ping(ip):
+                        node.status = "online"
+                    else:
+                        node.status = "offline"
+            else:
+                node.status = "nostatus"
+        # monitor/ping nodes every x seconds
+        time.sleep(settings.monitor_interval)
