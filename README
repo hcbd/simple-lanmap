@@ -1,0 +1,41 @@
+
+
+Version 0.3 dependencies:
+
+  Linux / Windows (tested on fedora 24)
+  python3
+  tkinter
+  ping/ping6
+  
+To run: python3 __init__.py
+
+Beware this code is not yet finished, 
+some buttons/options won't work yet and it contains some unused boilercode.
+Working:
+	ipv4 monitoring with hardcoded nodes in GUI.
+
+Config: currently only by hardcoding default settings into the settings.py file
+
+
+TODO:
+	
+network.py:
+- hostname / ip functions
+monitor.py:
+- implement ipv6
+scanner.py:
+- the presets class
+log.py:
+- 
+nodes.py:
+- save/load to a nodefile functions
+scanner.GUI
+- pretty much everything
+settings.py:
+- save/load settings to disk
+Gui:
+- Toolbar buttons do nothing except the first one
+
+	
+
+
