@@ -30,11 +30,13 @@ log.py:
 nodes.py:
 - save/load to a nodefile functions
 scanner.GUI
-- pretty much everything
+- make most buttons do stuff :P
+- ipv6 scanner
+- it only scans and shows a list for the moment
 settings.py:
 - save/load settings to disk
 Gui:
-- Toolbar buttons do nothing except the first one
+- Toolbar buttons do nothing except the monitor and open networkscanner one
 
 	
 

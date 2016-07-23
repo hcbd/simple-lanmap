@@ -12,7 +12,7 @@ from subprocess import Popen, STDOUT, PIPE
 
 def start_ipv4_scan(begin_address, end_address):
     """Start a IPv4 scan in a thread"""
-    _thread.start_new_thread(scan_ipv4, ())
+    _thread.start_new_thread(scan_ipv4, (begin_address, end_address))
 
 
 def start_ipv6_scan(interface):
@@ -57,6 +57,8 @@ def scan_ipv4(begin_address, end_address):
 
     # ping each ip in the scanlist
     settings.scanner_running = True
+        # needs a way to be faster: max 10 threads at the same
+        # time to ease on system and network.
     for ip in scanlist:
         if settings.scanner_running:
             ping = network.ping(ip)
@@ -129,7 +131,7 @@ class presets(object):
         self.start_ip = '192.168.1.1'
         self.end_ip = '192.168.1.254'
         self.get_hostnames = False
-        self.slow_network = False
+        self.set_timeout = 2  # in seconds
 
     def add(self, name, start_ip, end_ip, get_hostnames, slow_network):
         tup = (name, start_ip, end_ip, get_hostnames, slow_network)
@@ -148,6 +150,6 @@ class presets(object):
         """load the presets from the presets file"""
         #TODO
         # testpreset
-        self.add("Default Preset", "192.168.1.1", "192.168.1.254", False, False)
+        self.add("Default Preset", "192.168.1.1", "192.168.1.254", False, 2)
         # end testpreset
         pass

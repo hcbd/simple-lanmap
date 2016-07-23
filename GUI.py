@@ -29,39 +29,43 @@ class main_window(Frame):
         self.nodemap_frame = Frame(self.main_gui, bd=1, relief=SUNKEN)
         self.statusbar_frame = Frame(self.main_gui, height=20, bd=1)
 
-        self.toolbar_frame.pack(side=TOP, fill=X, padx=2, ipadx=30, ipady=5)
+        self.toolbar_frame.pack(side=TOP, fill=X, padx=5, ipadx=30, ipady=5)
         self.statusbar_frame.pack(side=BOTTOM, fill=X, ipadx=30, ipady=2)
         self.nodelist_frame.pack(side=LEFT, fill=Y)
         self.nodemap_frame.pack(side=RIGHT, fill=BOTH, expand=True, ipadx=15)
 
         # Create toolbar objects and layout
-        self.monitor_button = Button(self.toolbar_frame, text="Start \nmonitor",
+        self.monitor_button = Button(self.toolbar_frame, text="Start \nMonitor",
             command=lambda: self.start_monitor())
-        self.monitor_button.pack(side=LEFT, fill=Y, pady=2, ipadx=6)
+        self.monitor_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
 
-        self.save_nodes_button = Button(self.toolbar_frame, text="Save\nnodes")
-        self.save_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=10)
+        self.save_nodes_button = Button(self.toolbar_frame, text="Save\nNodes")
+        self.save_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
         self.save_nodes_button.bind("<Button-1>", self.save_nodes)
 
-        self.load_nodes_button = Button(self.toolbar_frame, text="Load\nnodes")
-        self.load_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=10)
+        self.load_nodes_button = Button(self.toolbar_frame, text="Load\nNodes")
+        self.load_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
         self.load_nodes_button.bind("<Button-1>", self.load_nodes)
 
-        self.edit_nodes_button = Button(self.toolbar_frame, text="Edit\nnodes")
-        self.edit_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=10)
+        self.edit_nodes_button = Button(self.toolbar_frame, text="Edit\nNodes")
+        self.edit_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
         self.edit_nodes_button.bind("<Button-1>", self.open_node_editor)
 
-        self.scanner_button = Button(self.toolbar_frame, text="Network\nscanner")
-        self.scanner_button.pack(side=LEFT, fill=Y, pady=2, ipadx=6)
+        self.scanner_button = Button(self.toolbar_frame, text="Network\nScanner")
+        self.scanner_button.pack(side=LEFT, fill=Y, pady=2, ipadx=11)
         self.scanner_button.bind("<Button-1>", self.open_scanner)
 
-        self.open_log_button = Button(self.toolbar_frame, text="Open log")
-        self.open_log_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=2)
+        self.open_log_button = Button(self.toolbar_frame, text="Open Log")
+        self.open_log_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=8)
         self.open_log_button.bind("<Button-1>", self.open_log)
 
         self.open_settings_button = Button(self.toolbar_frame, text="Settings")
-        self.open_settings_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=2)
+        self.open_settings_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=8)
         self.open_settings_button.bind("<Button-1>", self.open_settings)
+
+        self.bg_image_button = Button(self.toolbar_frame, text="Load\nBackground")
+        self.bg_image_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=6)
+        self.bg_image_button.bind("<Button-1>", self.change_image)
 
         # Create nodelist and layout
         self.nodelist = Canvas(self.nodelist_frame,
@@ -112,6 +116,7 @@ class main_window(Frame):
         self.monitor_button.config(text="Stop\nmonitor",
             command=lambda: self.stop_monitor())
         monitor.start()
+        #self.node
         self.update_nodemap()
         self.update_nodelist()
         self.update_monitor()
@@ -148,6 +153,11 @@ class main_window(Frame):
         """runs when the network scanner button is pressed on the toolbar"""
         self.scanner_window = scanner_gui()
         self.scanner_window.show()
+
+    def change_image(self, event=0):
+        """Load or Clear the Background image on the map"""
+        #TODO
+        pass
 
     def open_log(self, event):
         """runs when the open log button is pressed on the toolbar"""

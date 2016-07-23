@@ -27,7 +27,7 @@ scanner_preset_file = 'scan-presets.ini'
 scanner_presets = []
 
 # 4. gui settings
-gui_window_size = "1180x740"
+gui_window_size = "1180x760"
 gui_scanner_window_open = False
 
 # 4.1 gui - node list settings
