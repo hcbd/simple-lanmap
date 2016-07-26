@@ -11,33 +11,34 @@ To run: python3 __init__.py
 
 Beware this code is not yet finished, 
 some buttons/options won't work yet and it contains some unused boilercode.
-Working:
-	ipv4 monitoring with hardcoded nodes in GUI.
 
-Config: currently only by hardcoding default settings into the settings.py file
+Working (yet):
+	ipv4 monitoring
+	ipv4 scanning + import (presets/get hostnames/ping timeout/import selected don't work)
+	load a backgroundimage/floorplans/googlemaps screenshot into the map
+	save/load .nodes files to/from disk
+
+Config: edit the nodes.ini file or any saved .nodes file with a texteditor. (utf-8 encoded)
 
 
 TODO:
 	
 network.py:
-- hostname / ip functions
+- hostname / interface / my_own_ip functions
+
 monitor.py:
-- implement ipv6
+- ipv6 address handling
+
 scanner.py:
 - the presets class
-log.py:
-- 
-nodes.py:
-- save/load to a nodefile functions
-scanner.GUI
-- make most buttons do stuff :P
-- ipv6 scanner
-- it only scans and shows a list for the moment
+
 settings.py:
 - save/load settings to disk
-Gui:
-- Toolbar buttons do nothing except the monitor and open networkscanner one
 
-	
+gui.py:
+- Toolbar buttons: open node-editor, settings, open log do nothing
 
-
+gui_scanner.py:
+- import selected only button function
+- the + button after each node
+- ipv6 scanner

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # Containing all the functions for nodes control
+import settings
+import configparser
+import log
 
 
 class node(object):
@@ -15,22 +18,142 @@ class node(object):
         self.url = 'http://0.0.0.0'
         self.check_status = True
         self.status = 'offline'
-        self.parents = ''
+        self.parents = []
         self.wireless_to_parent = False
         self.coordinates = '50x50'
 
 
-def save_to_disk():
+def save_to_disk(nodefile=settings.program_last_used_nodesfile):
     """Save the current nodelist to a .nodes file"""
-    #TODO
+    try:
+        f = open(nodefile, "w")
+        f.write("\n")
+        f.write("# Lanmap Nodes\n")
+        f.write("\n")
+        f.write("[Map Background]\n")
+        imgloc = settings.gui_map_backgroundimage
+        f.write("image location=" + imgloc + "\n")
+        f.write("\n")
+        x = 1
+        for node in nodelist:
+            f.write("[Node " + str(x) + "]\n")
+            f.write("name=" + str(node.name) + "\n")
+            f.write("ipv4=" + str(node.ipv4) + "\n")
+            f.write("ipv6=" + str(node.ipv6) + "\n")
+            f.write("ipv6 linklocal=" + str(node.ipv6_linklocal) + "\n")
+            f.write("hostname=" + str(node.hostname) + "\n")
+            f.write("url=" + str(node.url) + "\n")
+            f.write("check status=" + str(node.check_status) + "\n")
+            f.write("status=" + str(node.status) + "\n")
+            f.write("parents=" + str(node.parents) + "\n")
+            f.write("wireless to parent=" + str(node.wireless_to_parent) + "\n")
+            f.write("coordinates=" + str(node.coordinates) + "\n")
+            f.write("\n")
+            x = x + 1
+    except:
+        print("error writing to nodes file")
     pass
 
 
-def load_from_disk():
+def load_from_disk(nodefile=settings.program_last_used_nodesfile):
     """Load a *.nodes file from disk and import the nodes in
        to the nodelist"""
-    #TODO
-    pass
+    global nodelist
+    nodelist = []
+    data = ""
+    try:
+        f = open(nodefile, "r")
+        data = f.read()
+    except:
+        print("error loading file")
+        load_example_nodelist()
+        log.add("error reading nodes file, reverting back to example list")
+
+    parser = configparser.ConfigParser()
+    parser.read_string(data)
+    try:
+        settings.gui_map_backgroundimage = parser['Map Background']['image location']
+    except:
+        settings.gui_map_backgroundimage = ""
+    x = 1
+    while True:
+        nodef = False
+        try:
+            nodef = "Node " + str(x)
+            a = parser[nodef]['name']
+        except:
+            break
+        if not nodef:
+            break
+        name = parser[nodef]['name']
+        ipv4 = parser[nodef]['ipv4']
+        addr = ipv4.split(", ")
+        ipv4 = []
+        for ip in addr:
+            ip = ip.replace("[", "")
+            ip = ip.replace("]", "")
+            ip = ip.replace("\'", "")
+            ip = ip.replace("\"]", "")
+            ip = ip.replace(" ", "")
+            ip = ip.replace(",", "")
+            ipv4.append(ip)
+        ipv6 = parser[nodef]['ipv6']
+        addr = ipv6.split(", ")
+        ipv6 = []
+        for ip in addr:
+            ip = ip.replace("[", "")
+            ip = ip.replace("]", "")
+            ip = ip.replace("\'", "")
+            ip = ip.replace("\"]", "")
+            ip = ip.replace(" ", "")
+            ip = ip.replace(",", "")
+            ipv6.append(ip)
+        ipv6_linklocal = parser[nodef]['ipv6 linklocal']
+        hostname = parser[nodef]['hostname']
+        url = parser[nodef]['url']
+        check_status = parser[nodef]['check status']
+        status = parser[nodef]['status']
+        parents = parser[nodef]['parents']
+        addr = parents.split(", ")
+        parents = []
+        for ip in addr:
+            ip = ip.replace("[", "")
+            ip = ip.replace("]", "")
+            ip = ip.replace("\'", "")
+            ip = ip.replace("\"]", "")
+            ip = ip.replace(" ", "")
+            ip = ip.replace(",", "")
+            parents.append(ip)
+        wireless_to_parent = parser[nodef]['wireless to parent']
+        coordinates = parser[nodef]['coordinates']
+        # input node into nodelist
+        new_node = node()
+        new_node.name = name
+        new_node.ipv4 = ipv4
+        new_node.ipv6 = ipv6
+        new_node.ipv6_linklocal = ipv6_linklocal
+        new_node.hostname = hostname
+        new_node.url = url
+        new_node.status = ""
+        if check_status == "True":
+            check_status = True
+        elif check_status == "False":
+            check_status = False
+        new_node.check_status = check_status
+        if status == "True": status = True
+        elif status == "False": status = False
+        new_node.status = status
+        new_node.parents = parents
+        if wireless_to_parent == "True": wireless_to_parent = True
+        elif wireless_to_parent == "False": wireless_to_parent = False
+        new_node.wireless_to_parent = wireless_to_parent
+        new_node.coordinates = coordinates
+        nodelist.append(new_node)
+        x = x + 1
+        #TODO: remove line below
+        #for node in new_node:
+            #print(node)
+    return True
 
 
 def load_example_nodelist():
@@ -67,7 +190,7 @@ def load_example_nodelist():
     # Node 3
     client1 = node()
     client1.name = 'File Server'
-    client1.ipv4 = ['172.16.32.32', ]
+    client1.ipv4 = ['192.168.1.3', ]
     client1.ipv6 = []
     client1.ipv6_linklocal = 'fe80:0000:0000:0000:0000:0000:0000:0003'
     client1.hostname = 'feda-3ews'
@@ -115,6 +238,5 @@ def load_example_nodelist():
 
 nodelist = []
 
-#TODO: check for saved version first
-
-load_example_nodelist()
+load_from_disk()
+#load_example_nodelist()

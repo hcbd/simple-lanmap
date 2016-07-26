@@ -10,7 +10,7 @@ import log
 program_name = 'Lanmap'
 program_version = 'Version 0.3.0'
 program_settingsfile = 'config.ini'
-program_last_used_nodesfile = 'last-used-nodes.ini'
+program_last_used_nodesfile = 'nodes.ini'
 program_computer_addresses = []
 program_computer_interfaces = []
 
@@ -50,6 +50,7 @@ gui_list_show_nostatus_nodes = True
 # 4.2 gui - node map settings
 gui_map_canvas_height = 1200
 gui_map_canvas_width = 1500
+gui_map_backgroundimage = ""
 gui_map_backgroundcolor = "#7A7A7A"
 gui_map_text_color = "#000000"
 gui_map_node_size = 17

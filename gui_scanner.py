@@ -5,6 +5,9 @@ import settings
 import scanner
 import network
 import ipaddress
+import time
+import nodes
+import gui
 from tkinter import *
 
 
@@ -22,7 +25,8 @@ class scanner_gui(object):
 
     def close(self):
         """close the scanner window"""
-        self.scan_stop()  # just in cause one is running
+        settings.scanner_running = False  # just in cause one is running
+        self.results.delete(ALL)
         self.window.destroy()
         settings.gui_scanner_window_open = False
 
@@ -30,20 +34,21 @@ class scanner_gui(object):
         """draw the scanner window"""
         # main window
         self.window = Toplevel()
+        #self.window = Tk()
         self.window.title("Lanmap - Network Scanner")
         self.window.geometry("702x505")
         self.window.protocol("WM_DELETE_WINDOW", self.close)
 
         # 2 frames and layout
         self.left_frame = Frame(self.window)
-        self.left_frame.pack(side=LEFT, fill=Y)
         self.right_frame = Frame(self.window, bd=1)
-        self.right_frame.pack(side=LEFT, fill=BOTH, padx=5, pady=5)
         self.left_top_frame = Frame(self.left_frame, bd=1, relief=SUNKEN,
             pady=5)
-        self.left_top_frame.pack(side=TOP, fill=X)
         self.left_bottom_frame = Frame(self.left_frame, bd=1, relief=SUNKEN)
-        self.left_bottom_frame.pack(side=TOP, fill=BOTH, expand=1)
+        self.left_frame.pack(side=LEFT, fill=Y)
+        self.right_frame.pack(side=LEFT, fill=BOTH, padx=5, pady=5)
+        self.left_top_frame.pack(side=TOP, fill=X)
+        self.left_bottom_frame.pack(side=TOP, fill=X, expand=1)
 
         # 3 select scan mode buttons
         self.scan_mode = IntVar()
@@ -117,6 +122,10 @@ class scanner_gui(object):
             text="Start Scan", height=4, command=self.scan_ipv4)
         self.ipv4_scan_button.pack(side=BOTTOM, fill=X, padx=3, pady=10)
 
+        #TODO remove entries below (2)
+        self.ipv4_start_ip.set("172.16.32.32")
+        self.ipv4_stop_ip.set("172.16.32.36")
+
         # IPv6 Scan Settings
         self.ipv6_scanner = Frame(self.left_bottom_frame, borderwidth=2)
         self.ipv6_title = Label(self.ipv6_scanner, text="IPv6 Scan Settings",
@@ -143,42 +152,41 @@ class scanner_gui(object):
             text="Start Scan", height=4)
         self.ipv6_scan_button.pack(side=BOTTOM, fill=X, padx=3, pady=10)
 
-        # Result command frame
-        self.results_commands = Frame(self.right_frame, height=30,
+        # Result commands frame
+        self.results_commands = Frame(self.right_frame, height=45,
             width=487)
-        self.results_commands.pack(side=BOTTOM, fill=X)
-        self.clear_results = 0
-        self.clear_selected = 0
-        self.add_results = 0
-        self.add_selected = 0
+        self.results_commands.pack(side=BOTTOM, fill=BOTH, padx=3, pady=3)
+        self.status_msg = Label(self.results_commands, text="Start a Scan",
+            width=25, anchor=W)
+        self.status_msg.pack(side=LEFT)
+        self.clear_results = Button(self.results_commands, text="Clear All",
+            command=self.clear_results_list)
+        self.clear_results.pack(side=LEFT)
+        self.add_selected = Button(self.results_commands, text="Import Selected")
+        self.add_selected.pack(side=LEFT)
+        self.add_results = Button(self.results_commands, text="Import All",
+            command=self.add_all_to_nodelist)
+        self.add_results.pack(side=LEFT)
 
         # Result list
         self.results = Canvas(self.right_frame, background="#EEEEEE",
-            scrollregion=(0, 0, 490, 1800), width=510, relief=SUNKEN)
+            scrollregion=(0, 0, 490, 1800), width=490, relief=SUNKEN)
         self.results_scrollbar = Scrollbar(self.right_frame,
             orient="vertical", command=self.results.yview)
         self.results_scrollbar.pack(side=RIGHT, fill=Y)
         self.results.configure(yscrollcommand=self.results_scrollbar.set)
         self.results.pack(side=LEFT, fill=BOTH, expand=1)
-
-        # header row of results list
-        self.results.create_rectangle(1, 1, 489, 36, fill="#EEF4B2")
-        self.results.create_line(1, 37, 490, 37, width=3)
-        self.results.create_text(14, 13, text="[ ]", anchor=NW)
-        self.results.create_text(39, 13, text="Ip addresses", anchor=NW)
-        self.results.create_text(166, 13, text="Name", anchor=NW)
-        self.results.create_text(301, 13, text="Parents ip('s)", anchor=NW)
-        self.results.create_text(428, 13, text="Add node", anchor=NW)
+        self.update_results()
 
 # class functions
 
     def switch_to_ipv4(self, event):
-        """if the ipv4 scan button is pressed, adjust tkinter widgets"""
+        """if the ipv4 scan button is pressed, switch widgets"""
         self.ipv4_scanner.pack()
         self.ipv6_scanner.pack_forget()
 
     def switch_to_ipv6(self, event):
-        """if the ipv6 scan button is pressed, adjust tkinter widgets"""
+        """if the ipv6 scan button is pressed, switch widgets"""
         self.ipv4_scanner.pack_forget()
         self.ipv6_scanner.pack()
 
@@ -203,7 +211,8 @@ class scanner_gui(object):
             scanner.start_ipv4_scan(start, stop)
             self.ipv4_scan_button.config(text="SCANNING\nStop Scan",
                 command=self.scan_stop)
-        self.update_results()
+            self.status_msg.config(text="Scanning...")
+            self.window.after(10, self.scan_running)
 
     def scan_ipv6(self):
         """start a ipv6 scan"""
@@ -211,8 +220,16 @@ class scanner_gui(object):
         self.ipv6_scan_button.config(text="Stop Scan",
             command=self.scan_stop)
 
+    def scan_running(self):
+        while settings.scanner_running:
+            time.sleep(1)
+        else:
+            self.status_msg.config(text="Scan Complete")
+            self.scan_stop()
+
     def scan_stop(self):
         settings.scanner_running = False
+        self.update_results()
         self.ipv4_scan_button.config(text="Start Scan",
             command=self.scan_ipv4)
         self.ipv6_scan_button.config(text="Start Scan",
@@ -220,60 +237,83 @@ class scanner_gui(object):
 
     def add_preset(self):
         """add input values into new preset"""
+        #TODO:
         pass
 
     def delete_preset(self):
         """add input values into new preset"""
+        #TODO:
         pass
 
     def load_preset(self):
         """add input values into new preset"""
+        #TODO:
         pass
 
     def update_results(self):
         """update the results list"""
-        if settings.scanner_running:
+            # header row of results list
+        self.results.create_rectangle(1, 1, 489, 36, fill="#EEF4B2")
+        self.results.create_line(1, 37, 490, 37, width=3)
+        self.results.create_text(14, 13, text="[ ]", anchor=NW)
+        self.results.create_text(39, 13, text="Ip addresses", anchor=NW)
+        self.results.create_text(421, 13, text="Add node", anchor=NW)
             # add found nodes to resultlist
-            offset_y = 38  # offset for the header
-            for node in settings.scanner_scan_result:
-                item_selected = IntVar()
-                item_address = StringVar()
-                item_name = StringVar()
-                item_parents = StringVar()
+        self.results.delete("result")
+        offset_y = 38  # offset for the header
+        index = 1
+        for node in settings.scanner_scan_result:
+            item_selected = IntVar()
+            self.results_selector = Checkbutton(self.results, text="",
+                variable=item_selected, pady=2, padx=2, bg="#EEEEEE",
+                bd=0)
+            self.results.create_window(6, offset_y + 8,
+                window=self.results_selector, anchor=NW, tags=('result',
+                    'node' + str(index),))
+            self.results.create_text(39, offset_y + 12,
+                text=str(node), anchor=NW, tags=('result',))
+            self.results_add_node_button = Button(self.results, text="+",
+                padx=20)
+            self.results.create_window(420, offset_y + 4,
+                window=self.results_add_node_button, anchor=NW,
+                tags=('result',))
+            offset_y = offset_y + 38
+            self.results.create_line(0, offset_y, 490, offset_y, width=2,
+                tags='result',)
+            index = index + 1
 
-                self.results_selector = Checkbutton(self.results, text="",
-                    variable=item_selected, pady=2, padx=2, bg="#EEEEEE",
-                    bd=0)
-                self.results.create_window(6, offset_y + 8,
-                    window=self.results_selector, anchor=NW)
+    def clear_results_list(self):
+        """clears the results list and update the view"""
+        settings.scanner_scan_result = []
+        self.update_results()
 
-                self.results_address_entry = Entry(self.results, width=14,
-                    textvariable=item_address)
-                self.results.create_window(39, offset_y + 9,
-                    window=self.results_address_entry, anchor=NW)
+    def add_selected_to_nodelist(self):
+        """add the selected found nodes to the nodelist and map"""
+        #TODO
+        pass
 
-                self.results_name_entry = Entry(self.results, width=15,
-                    textvariable=item_name)
-                self.results.create_window(166, offset_y + 9,
-                    window=self.results_name_entry, anchor=NW)
-
-                self.results_parents_entry = Entry(self.results, width=14,
-                    textvariable=item_parents)
-                self.results.create_window(301, offset_y + 9,
-                    window=self.results_parents_entry,
-                    anchor=NW)
-
-                self.results_add_node_button = Button(self.results, text="+",
-                    padx=20)
-                self.results.create_window(427, offset_y + 4,
-                    window=self.results_add_node_button, anchor=NW)
-
-                item_address.set(str(node))
-
-                offset_y = offset_y + 38
-                self.results.create_line(0, offset_y, 490, offset_y, width=2)
-
-            # update list every second
-            self.window.after(2000, self.update_results)
-        else:
-            self.scan_stop()  # reset buttons
+    def add_all_to_nodelist(self):
+        """add all found nodes in list to nodelist and map"""
+        if settings.scanner_scan_result == [""]:
+            print("list is empty")
+            return
+        x = 50
+        for nd in settings.scanner_scan_result:
+            new_node = nodes.node()
+            new_node.name = nd
+            new_node.ipv4 = [nd, ]
+            new_node.ipv6 = ['', ]
+            new_node.ipv6_linklocal = ['', ]
+            new_node.hostname = ''
+            new_node.url = 'http://' + str(nd)
+            new_node.check_status = True
+            new_node.status = 'Awaiting'
+            new_node.parents = ['', ]
+            new_node.wireless_to_parent = False
+            new_node.coordinates = '75x' + str(x)
+            x = x + 50
+            nodes.nodelist.append(new_node)
+        settings.scanner_scan_result = []
+        self.update_results()
+        gui.app.update_nodelist()
+        gui.app.update_nodemap()

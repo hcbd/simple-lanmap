@@ -28,6 +28,6 @@ from monitor import *
 from scanner import *
 
 # Start GUI
-from GUI import *
+from gui import *
 
 # TODO: load settings

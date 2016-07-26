@@ -30,6 +30,8 @@ def scan_ipv4(begin_address, end_address):
     # need 2 lists for scanning and results
     scanlist = []
     foundlist = []
+    if not settings.scanner_scan_result == []:
+        foundlist = settings.scanner_scan_result
 
     # test if ip is valid
     start_ip = False
@@ -64,7 +66,7 @@ def scan_ipv4(begin_address, end_address):
             ping = network.ping(ip)
             if ping:
                 foundlist.append(ip)
-                settings.scanner_scan_result = foundlist
+    settings.scanner_scan_result = foundlist
     settings.scanner_running = False
 
     if not foundlist == []:

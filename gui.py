@@ -6,8 +6,9 @@ import settings
 import log
 import nodes
 import monitor
-from scannerGUI import scanner_gui
+from gui_scanner import scanner_gui
 from tkinter import *
+from tkinter import filedialog
 
 
 class main_window(Frame):
@@ -39,13 +40,13 @@ class main_window(Frame):
             command=lambda: self.start_monitor())
         self.monitor_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
 
-        self.save_nodes_button = Button(self.toolbar_frame, text="Save\nNodes")
+        self.save_nodes_button = Button(self.toolbar_frame, text="Save\nNetwork",
+            command=self.save_nodes)
         self.save_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
-        self.save_nodes_button.bind("<Button-1>", self.save_nodes)
 
-        self.load_nodes_button = Button(self.toolbar_frame, text="Load\nNodes")
+        self.load_nodes_button = Button(self.toolbar_frame, text="Load\nNetwork",
+            command=self.load_nodes)
         self.load_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
-        self.load_nodes_button.bind("<Button-1>", self.load_nodes)
 
         self.edit_nodes_button = Button(self.toolbar_frame, text="Edit\nNodes")
         self.edit_nodes_button.pack(side=LEFT, fill=Y, pady=2, ipadx=15)
@@ -63,9 +64,12 @@ class main_window(Frame):
         self.open_settings_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=8)
         self.open_settings_button.bind("<Button-1>", self.open_settings)
 
-        self.bg_image_button = Button(self.toolbar_frame, text="Load\nBackground")
+        self.bg_image_button = Button(self.toolbar_frame, text="Clear\nBackground",
+            command=self.change_image)
         self.bg_image_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=6)
-        self.bg_image_button.bind("<Button-1>", self.change_image)
+        if settings.gui_map_backgroundimage == "":
+            self.bg_image_button.config(text="Load\nBackground")
+            self.bg_image_button_state = 0
 
         # Create nodelist and layout
         self.nodelist = Canvas(self.nodelist_frame,
@@ -76,7 +80,6 @@ class main_window(Frame):
         self.nodelist_scrollbar.pack(side=RIGHT, fill=Y)
         self.nodelist.configure(yscrollcommand=self.nodelist_scrollbar.set)
         self.nodelist.pack(side=LEFT, fill=BOTH, expand=True)
-            #TODO: add bindings to the node list
         self.update_nodelist()
 
         # Create nodemap and layout
@@ -116,7 +119,6 @@ class main_window(Frame):
         self.monitor_button.config(text="Stop\nmonitor",
             command=lambda: self.stop_monitor())
         monitor.start()
-        #self.node
         self.update_nodemap()
         self.update_nodelist()
         self.update_monitor()
@@ -137,13 +139,21 @@ class main_window(Frame):
             self.update_nodelist()
             root.after(2000, self.update_monitor)
 
-    def save_nodes(self, event):
+    def save_nodes(self):
         """runs when the save nodes button is pressed on the toolbar"""
-        pass
+        location = filedialog.asksaveasfilename(defaultextension=".nodes",
+            filetypes=[('Node File', '.nodes'), ('Text File', '.txt')],
+            title='Save Nodes to File', initialfile='my-network.nodes')
+        nodes.save_to_disk(location)
 
-    def load_nodes(self, event):
+    def load_nodes(self):
         """runs when the load nodes button is pressed on the toolbar"""
-        pass
+        location = filedialog.askopenfilename(defaultextension=".nodes",
+            filetypes=[('Node File', '.nodes'), ('Text File', '.txt')],
+            title='Save Nodes to File')
+        nodes.load_from_disk(location)
+        self.update_nodelist()
+        self.update_nodemap()
 
     def open_node_editor(self, event):
         """runs when the edit nodes button is pressed on the toolbar"""
@@ -156,8 +166,17 @@ class main_window(Frame):
 
     def change_image(self, event=0):
         """Load or Clear the Background image on the map"""
-        #TODO
-        pass
+        if settings.gui_map_backgroundimage == "":
+            #load path and image
+            openf = filedialog.askopenfilename(defaultextension=".gif",
+                filetypes=[('GIF files', '.gif'), ('all files', '.*')],
+                title="Select Background Image - GIF files only")
+            if openf:
+                settings.gui_map_backgroundimage = openf
+        else:
+            #clear background
+            settings.gui_map_backgroundimage = ""
+        self.update_nodemap()
 
     def open_log(self, event):
         """runs when the open log button is pressed on the toolbar"""
@@ -170,7 +189,7 @@ class main_window(Frame):
     # Nodelist functions
     def update_nodelist(self):
         """draws a header and all the nodes on to the nodelist canvas"""
-        self.nodelist.delete("all")
+        self.nodelist.delete(ALL)
         self.nodelist.create_rectangle(2, 2, settings.gui_list_width, 26,
             fill=settings.gui_list_header_bgcolor)
         self.nodelist.create_text(23, 15, text="Network Nodes", anchor=W,
@@ -185,12 +204,10 @@ class main_window(Frame):
             number = counter + 1
             name = str(number) + ". " + str(node.name)
             if node.check_status:
-                if len(node.ipv4) == 1 and len(node.ipv6) == 0:
-                    address = "[" + str(node.ipv4[0]) + "]"
-                elif len(node.ipv4) == 0 and len(node.ipv6) == 1:
+                if len(node.ipv4) == 0 and len(node.ipv6) == 1:
                     address = "[" + str(node.ipv6[0]) + "]"
                 else:
-                    address = "[multiple addresses]"
+                    address = "[" + str(node.ipv4[0]) + "]"
             else:
                 address = "[non-pingable device]"
             pos_top = number * 38 - 11
@@ -230,18 +247,25 @@ class main_window(Frame):
     def update_nodemap(self):
         """update the map view"""
         self.nodemap.delete(ALL)
-        self.update_nodemap_bgimage()
         self.update_nodemap_nodes()
         self.update_statusbar()
 
     def update_nodemap_bgimage(self):
         """reloads the background image on the nodemap"""
-        self.reset_layers()
-        pass
+        if settings.gui_map_backgroundimage == "":
+            self.bg_image_button.config(text="Load\nBackground")
+            return
+        bgimage = PhotoImage(file=settings.gui_map_backgroundimage)
+        self.nodemap.image = bgimage
+        self.nodemap.create_image(0, 0, image=bgimage, anchor=NW,
+            tags="bg")
+        self.bg_image_button.config(text="Clear\nBackground")
 
     def update_nodemap_nodes(self):
         """reloads the nodes on the nodemap"""
         global node
+        self.nodemap.delete(ALL)
+        self.update_nodemap_bgimage()
         no_coord_count = 0
         for node in nodes.nodelist:
             # set and calculate all necessary vars
@@ -402,7 +426,7 @@ class main_window(Frame):
 
 def saveAndQuit():
     #settings.save()
-    #nodes.save()
+    nodes.save_to_disk()
     #log.save()
     root.destroy()
 
@@ -417,6 +441,6 @@ root.protocol("WM_DELETE_WINDOW", saveAndQuit)
 
 root.geometry(settings.gui_window_size)
 #root.attributes('-zoomed', True) #start with maximized gui
-app = main_window(root)
 
+app = main_window(root)
 root.mainloop()
