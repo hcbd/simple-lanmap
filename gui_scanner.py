@@ -153,16 +153,16 @@ class scanner_gui(object):
             width=487)
         self.results_commands.pack(side=BOTTOM, fill=BOTH, padx=3, pady=3)
         self.status_msg = Label(self.results_commands, text="Start a Scan",
-            width=25, anchor=W)
+            width=15, anchor=W)
         self.status_msg.pack(side=LEFT)
-        self.clear_results = Button(self.results_commands, text="Clear All",
-            command=self.clear_results_list)
-        self.clear_results.pack(side=LEFT)
-        self.add_selected = Button(self.results_commands, text="Import Selected")
-        self.add_selected.pack(side=LEFT)
         self.add_results = Button(self.results_commands, text="Import All",
             command=self.add_all_to_nodelist)
-        self.add_results.pack(side=LEFT)
+        self.add_results.pack(side=RIGHT, padx=3, ipadx=2)
+        self.add_selected = Button(self.results_commands, text="Import Selected")
+        self.add_selected.pack(side=RIGHT, padx=3, ipadx=2)
+        self.clear_results = Button(self.results_commands, text="Clear All",
+            command=self.clear_results_list)
+        self.clear_results.pack(side=RIGHT, padx=3, ipadx=2)
 
         # Result list
         self.results = Canvas(self.right_frame, background="#EEEEEE",
