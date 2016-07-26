@@ -122,10 +122,6 @@ class scanner_gui(object):
             text="Start Scan", height=4, command=self.scan_ipv4)
         self.ipv4_scan_button.pack(side=BOTTOM, fill=X, padx=3, pady=10)
 
-        #TODO remove entries below (2)
-        self.ipv4_start_ip.set("172.16.32.32")
-        self.ipv4_stop_ip.set("172.16.32.36")
-
         # IPv6 Scan Settings
         self.ipv6_scanner = Frame(self.left_bottom_frame, borderwidth=2)
         self.ipv6_title = Label(self.ipv6_scanner, text="IPv6 Scan Settings",

@@ -30,6 +30,7 @@ def clear():
 
 def save_to_disk(save_name):
     """save the log file to disk with the given location"""
+    #TODO: finish this
     try:
         save_name = save_name + '.txt'
         f = open(save_name, "w")

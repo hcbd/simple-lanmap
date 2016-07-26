@@ -64,16 +64,19 @@ def ping(ipaddr, timeout=1, count=1, interface=False):
 
 def get_hostname(ipaddr):
     """Returns the hostname of the device or False when none is present"""
+    #TODO
     return False
 
 
 def get_my_ip():
     """Returns the connected interface(s) and their ipaddress(es)"""
+    #TODO
     return '0.0.0.0'
 
 
 def get_interface():
     """returns the connected interface and filters out loopback adapters etc"""
+    #TODO
     return 'eth0'
 
 

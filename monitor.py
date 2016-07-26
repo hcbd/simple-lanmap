@@ -26,6 +26,7 @@ def stop():
 def monitor_nodes():
     """Ping all nodes in the list at an given interval
        and change the node status to the fetched one"""
+       #TODO: ipv6 support
     while settings.monitor_running:
         # load each node in list
         for node in nodes.nodelist:

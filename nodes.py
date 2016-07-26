@@ -150,9 +150,6 @@ def load_from_disk(nodefile=settings.program_last_used_nodesfile):
         new_node.coordinates = coordinates
         nodelist.append(new_node)
         x = x + 1
-        #TODO: remove line below
-        #for node in new_node:
-            #print(node)
     return True
 
 

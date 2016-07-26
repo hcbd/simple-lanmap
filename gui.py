@@ -157,6 +157,7 @@ class main_window(Frame):
 
     def open_node_editor(self, event):
         """runs when the edit nodes button is pressed on the toolbar"""
+        #TODO
         pass
 
     def open_scanner(self, event):
