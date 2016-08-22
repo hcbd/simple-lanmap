@@ -50,9 +50,9 @@ def save_to_disk(nodefile=settings.program_last_used_nodesfile):
             f.write("coordinates=" + str(node.coordinates) + "\n")
             f.write("\n")
             x = x + 1
+        log.add("Nodes saved to file: " + nodefile)
     except:
-        print("error writing to nodes file")
-    pass
+        log.add("Error: failed to write nodes file")
 
 
 def load_from_disk(nodefile=settings.program_last_used_nodesfile):
@@ -65,9 +65,9 @@ def load_from_disk(nodefile=settings.program_last_used_nodesfile):
         f = open(nodefile, "r")
         data = f.read()
     except:
-        print("error loading file")
         load_example_nodelist()
-        log.add("error reading nodes file, reverting back to example list")
+        log.add("Error: failed to read nodes file, reverting back to example list")
+        return
 
     parser = configparser.ConfigParser()
     parser.read_string(data)
@@ -150,6 +150,7 @@ def load_from_disk(nodefile=settings.program_last_used_nodesfile):
         new_node.coordinates = coordinates
         nodelist.append(new_node)
         x = x + 1
+    log.add("Loaded nodes from file: " + str(nodefile))
     return True
 
 

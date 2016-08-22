@@ -8,7 +8,7 @@ import log
 
 # 1. general program settings
 program_name = 'Lanmap'
-program_version = 'Version 0.3.0'
+program_version = 'Version 0.3 Alpha'
 program_settingsfile = 'config.ini'
 program_last_used_nodesfile = 'nodes.ini'
 program_computer_addresses = []
@@ -29,6 +29,7 @@ scanner_presets = []
 # 4. gui settings
 gui_window_size = "1180x760"
 gui_scanner_window_open = False
+gui_editor_open = False
 
 # 4.1 gui - node list settings
 gui_list_width = 190
@@ -72,6 +73,7 @@ gui_map_node_onmouseover_color = "#555555"
 # 5. log settings
 log_enabled = True
 log_timestamp_enabled = True
+gui_log_open = False
 
 
 def load():

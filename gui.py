@@ -7,6 +7,8 @@ import log
 import nodes
 import monitor
 from gui_scanner import scanner_gui
+from gui_log import log_gui
+from gui_editor import editor_gui
 from tkinter import *
 from tkinter import filedialog
 
@@ -56,9 +58,10 @@ class main_window(Frame):
         self.scanner_button.pack(side=LEFT, fill=Y, pady=2, ipadx=11)
         self.scanner_button.bind("<Button-1>", self.open_scanner)
 
-        self.open_log_button = Button(self.toolbar_frame, text="Open Log")
+        self.open_log_button = Button(self.toolbar_frame, text="Open Log",
+            command=self.open_log)
         self.open_log_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=8)
-        self.open_log_button.bind("<Button-1>", self.open_log)
+        #self.open_log_button.bind("<Button-1>", self.open_log)
 
         self.open_settings_button = Button(self.toolbar_frame, text="Settings")
         self.open_settings_button.pack(side=RIGHT, fill=Y, pady=2, ipadx=8)
@@ -157,7 +160,8 @@ class main_window(Frame):
 
     def open_node_editor(self, event):
         """runs when the edit nodes button is pressed on the toolbar"""
-        #TODO
+        self.editor_window = editor_gui()
+        self.editor_window.show()
         pass
 
     def open_scanner(self, event):
@@ -179,9 +183,10 @@ class main_window(Frame):
             settings.gui_map_backgroundimage = ""
         self.update_nodemap()
 
-    def open_log(self, event):
+    def open_log(self):
         """runs when the open log button is pressed on the toolbar"""
-        pass
+        self.log_window = log_gui()
+        self.log_window.show()
 
     def open_settings(self, event):
         """runs when the settings button is pressed on the toolbar"""
@@ -434,7 +439,7 @@ def saveAndQuit():
 # main instance
 root = Tk()
 
-log.add("Lanmap Started")
+log.add("Lanmap ready")
 #settings.load()
 
 # save config if window is closed

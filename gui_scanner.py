@@ -158,7 +158,9 @@ class scanner_gui(object):
         self.add_results = Button(self.results_commands, text="Import All",
             command=self.add_all_to_nodelist)
         self.add_results.pack(side=RIGHT, padx=3, ipadx=2)
-        self.add_selected = Button(self.results_commands, text="Import Selected")
+        self.add_selected = Button(self.results_commands, text="Import Selected",
+            #TODO change state to normal when function avialable
+            state=DISABLED)
         self.add_selected.pack(side=RIGHT, padx=3, ipadx=2)
         self.clear_results = Button(self.results_commands, text="Clear All",
             command=self.clear_results_list)
